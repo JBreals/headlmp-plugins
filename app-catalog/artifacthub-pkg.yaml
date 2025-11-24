@@ -1,0 +1,11 @@
+version: 0.7.0              # 플러그인 버전
+name: app-catalog           # 패키지 이름(Artifact Hub 상 이름)
+displayName: App Catalog    # 사람이 보는 이름
+createdAt: "2025-11-24T00:17:00Z"
+logoURL: https://github.com/yolossn/headlamp-plugins/raw/main/app-catalog/test.png
+description: Headlamp app catalog with newer features.
+annotations:
+  headlamp/plugin/archive-url: https://github.com/JBreals/headlmp-plugins/releases/download/v0.7.0/app-catalog-0.7.0.tar.gz
+  headlamp/plugin/archive-checksum: "sha256:5500ad248f29a1c4ad37c9adc2c394684f4026349e9815397e4332b0daafe7ad"
+  headlamp/plugin/version-compat: ">=0.30.0"        # 지원하는 Headlamp 버전
+  headlamp/plugin/distro-compat: "desktop,in-cluster"
