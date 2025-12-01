@@ -13,6 +13,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import remarkGfm from 'remark-gfm';
 import { getCatalogConfig } from '../../api/catalogConfig';
 import { fetchChartDetailFromArtifact } from '../../api/charts';
+import { isElectron } from '../../index';
 import { EditorDialog } from './EditorDialog';
 
 const { createRouteURL } = Router;
@@ -44,6 +45,12 @@ export default function ChartDetails({ vanillaHelmRepo }: ChartDetailsProps) {
   } | null>(null);
   const [openEditor, setOpenEditor] = useState(false);
   const chartCfg = getCatalogConfig();
+  const chartsRouteName = isElectron()
+    ? 'Charts'
+    : chartCfg.catalogName && chartCfg.catalogNamespace
+    ? `Charts ${chartCfg.catalogName}-${chartCfg.catalogNamespace}`
+    : '';
+  const backLink = chartsRouteName ? createRouteURL(chartsRouteName) : undefined;
 
   useEffect(() => {
     // Note: This path is not enabled for vanilla helm repo. Please check the following comment in charts/List.tsx
@@ -90,7 +97,7 @@ export default function ChartDetails({ vanillaHelmRepo }: ChartDetailsProps) {
             ]}
           />
         }
-        backLink={createRouteURL('Charts')}
+        backLink={backLink}
       >
         {!chart ? (
           <Loader title="" />
