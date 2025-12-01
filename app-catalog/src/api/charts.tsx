@@ -72,9 +72,10 @@ export async function fetchChartsFromArtifact(
       const url =
         `${SERVICE_PROXY}/${chartCfg.catalogNamespace}/${chartCfg.catalogName}?` +
         getURLSearchParams(requestParam);
-      const dataResponse = await request(url, {}, true, true, {}).then(response => response);
-      const total = dataResponse?.headers?.get('pagination-total-count') ?? 0;
-      return { data: dataResponse, total };
+      const response = await request(url, { returnRawResponse: true }, true, true, {});
+      const total = response.headers?.get('pagination-total-count') ?? '0';
+      const data = await response.json();
+      return { data, total };
     }
   }
 

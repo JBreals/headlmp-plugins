@@ -438,15 +438,24 @@ export function ChartsList({ fetchCharts = fetchChartsFromArtifact }) {
                               {chartCfg.chartProfile === VANILLA_HELM_REPO ? (
                                 chart.name
                               ) : (
-                                <RouterLink
-                                  routeName="/helm/:repoName/charts/:chartName"
-                                  params={{
-                                    chartName: chart.name,
-                                    repoName: chart?.repository?.name,
-                                  }}
-                                >
-                                  {chart.name}
-                                </RouterLink>
+                                (() => {
+                                  const repoName = chart?.repository?.name;
+                                  if (!repoName) {
+                                    return chart.name;
+                                  }
+
+                                  return (
+                                    <RouterLink
+                                      routeName="/helm/:repoName/charts/:chartName"
+                                      params={{
+                                        chartName: chart.name,
+                                        repoName,
+                                      }}
+                                    >
+                                      {chart.name}
+                                    </RouterLink>
+                                  );
+                                })()
                               )}
                             </Typography>
                           </Tooltip>
