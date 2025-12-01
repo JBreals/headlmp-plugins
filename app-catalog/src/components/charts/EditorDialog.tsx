@@ -24,8 +24,6 @@ export function EditorDialog(props: {
   handleEditor: (open: boolean) => void;
   chartProfile: string;
 }) {
-  if (!props.chart) return null;
-
   const { openEditor, handleEditor, chart, chartProfile } = props;
   const [installLoading, setInstallLoading] = useState(false);
   const [namespaces, error] = K8s.ResourceClasses.Namespace.useList();
@@ -72,6 +70,10 @@ export function EditorDialog(props: {
   }
 
   function handleChartValueFetch(chart: any) {
+    if (!chart) {
+      return;
+    }
+
     const packageID = chartCfg.chartProfile === chartProfile ? chart.name : chart.package_id;
     const packageVersion = selectedVersion?.value ?? chart.version;
     setChartValuesLoading(true);
@@ -91,6 +93,10 @@ export function EditorDialog(props: {
   }
 
   useEffect(() => {
+    if (!chart) {
+      return;
+    }
+
     if (chartCfg.chartProfile === chartProfile) {
       const versionsArray =
         AVAILABLE_VERSIONS instanceof Map && AVAILABLE_VERSIONS.get && chart.name
@@ -118,13 +124,13 @@ export function EditorDialog(props: {
         }
       });
     }
-  }, [chart]);
+  }, [chart, chartCfg.chartProfile, chartProfile]);
 
   useEffect(() => {
-    if (selectedVersion) {
+    if (selectedVersion && chart) {
       handleChartValueFetch(chart);
     }
-  }, [selectedVersion]);
+  }, [selectedVersion, chart]);
 
   function checkInstallStatus(releaseName: string) {
     setTimeout(() => {
@@ -149,6 +155,10 @@ export function EditorDialog(props: {
   }
 
   function installAndCreateReleaseHandler() {
+    if (!chart) {
+      return;
+    }
+
     setIsFormSubmitting(true);
     if (!validateFormField(releaseName)) {
       enqueueSnackbar('Release name is required', {
@@ -239,6 +249,10 @@ export function EditorDialog(props: {
     }
   }
 
+  if (!chart) {
+    return null;
+  }
+
   return (
     <Dialog
       open={openEditor}
@@ -305,7 +319,12 @@ export function EditorDialog(props: {
                 value={selectedVersion ?? versions[0]}
                 // @ts-ignore
                 onChange={(event, newValue: FieldType) => {
-                  if (chartCfg.chartProfile === chartProfile && chart.version !== newValue.value) {
+                  if (
+                    chart &&
+                    newValue &&
+                    chartCfg.chartProfile === chartProfile &&
+                    chart.version !== newValue.value
+                  ) {
                     // Refresh values.yaml for a chart when the current version and new version differ
                     refreshChartValue(chart.name, newValue.value);
                   }

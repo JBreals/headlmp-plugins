@@ -48,14 +48,15 @@ export function EditorDialog(props: {
     isUpdateRelease,
     handleUpdate,
   } = props;
-  if (!release) return null;
   const themeName = localStorage.getItem('headlampThemePreference');
   const { enqueueSnackbar } = useSnackbar();
   const [valuesToShow, setValuesToShow] = useState(
-    Object.assign({}, release.chart.values, release.config)
+    release ? Object.assign({}, release.chart.values, release.config) : {}
   );
-  const [values, setValues] = useState(Object.assign({}, release.chart.values, release.config));
-  const [userValues, setUserValues] = useState(release.config);
+  const [values, setValues] = useState(
+    release ? Object.assign({}, release.chart.values, release.config) : {}
+  );
+  const [userValues, setUserValues] = useState(release ? release.config : {});
   const [isUserValues, setIsUserValues] = useState(false);
   const [releaseUpdateDescription, setReleaseUpdateDescription] = useState('');
   const [upgradeLoading, setUpgradeLoading] = useState(false);
@@ -71,6 +72,12 @@ export function EditorDialog(props: {
 
   useEffect(() => {
     let isMounted = true;
+
+    if (!release) {
+      return () => {
+        isMounted = false;
+      };
+    }
 
     if (isUpdateRelease) {
       const fetchChartVersions = async () => {
@@ -125,7 +132,18 @@ export function EditorDialog(props: {
     return () => {
       isMounted = false;
     };
-  }, [isUpdateRelease]);
+  }, [isUpdateRelease, release]);
+
+  useEffect(() => {
+    if (!release) {
+      return;
+    }
+
+    const mergedValues = Object.assign({}, release.chart.values, release.config);
+    setValuesToShow(mergedValues);
+    setValues(mergedValues);
+    setUserValues(release.config);
+  }, [release]);
 
   function handleValueChange(event: any) {
     if (event.target.checked) {
@@ -233,6 +251,10 @@ export function EditorDialog(props: {
     } else {
       setValues(yamlToJSON(value));
     }
+  }
+
+  if (!release) {
+    return null;
   }
 
   return (
