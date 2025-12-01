@@ -199,7 +199,7 @@ export function ChartsList({ fetchCharts = fetchChartsFromArtifact }) {
     }
 
     hasHydrated.current = true;
-  }, [catalogKey, config?.listState, helmChartCategoryList, page, search, chartCategory.value]);
+  }, [catalogKey, config?.listState, helmChartCategoryList]);
 
   // note: When the users changes the chartCategory or search, then we always go back to the first page
   useEffect(() => {
@@ -212,17 +212,28 @@ export function ChartsList({ fetchCharts = fetchChartsFromArtifact }) {
   // note: When the page changes, we fetch the charts, this will run as a reaction to the previous useEffect
   useEffect(
     function fetchChartsOnPageChange() {
-      store.set({
-        showOnlyVerified: showOnlyVerified,
-        listState: {
-          ...(config?.listState ?? {}),
-          [catalogKey]: {
-            page,
-            search,
-            categoryValue: chartCategory.value,
+      const prevState = config?.listState?.[catalogKey];
+      const nextState = {
+        page,
+        search,
+        categoryValue: chartCategory.value,
+      };
+
+      if (
+        !prevState ||
+        prevState.page !== nextState.page ||
+        prevState.search !== nextState.search ||
+        prevState.categoryValue !== nextState.categoryValue ||
+        (config?.showOnlyVerified ?? true) !== showOnlyVerified
+      ) {
+        store.set({
+          showOnlyVerified: showOnlyVerified,
+          listState: {
+            ...(config?.listState ?? {}),
+            [catalogKey]: nextState,
           },
-        },
-      });
+        });
+      }
 
       async function fetchData() {
         try {
@@ -243,7 +254,7 @@ export function ChartsList({ fetchCharts = fetchChartsFromArtifact }) {
       }
       fetchData();
     },
-    [page, chartCategory, search, showOnlyVerified, catalogKey, config?.listState]
+    [page, chartCategory, search, showOnlyVerified, catalogKey]
   );
 
   type HelmIndex = Record<string, any[]>;
